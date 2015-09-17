@@ -33,7 +33,7 @@ public class AZME extends CordovaPlugin {
     private String previousActivityName = null;
     private String lastRedirect = null;
     private boolean enableLog = false;
-    private static final String LOG_TAG = "cdvazme-test";
+    public static final String LOG_TAG = "cdvazme-test";
     private static final String pluginVersion = "2.0.1";
     private static final String nativeSDKVersion = "4.1.0"; // to eventually retrieve from the SDK itself
 

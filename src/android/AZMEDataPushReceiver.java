@@ -27,23 +27,31 @@ import com.microsoft.azure.engagement.cordova.AZME;
 
  public class AZMEDataPushReceiver extends EngagementReachDataPushReceiver
  {
-     public static String Category;
-     public static String Body;
+    public static String Category;
+    public static String Body;
 
-     @Override
-      protected Boolean onDataPushStringReceived(Context context, String category, String body)
-      {
-            Log.d("tmp", "String data push message received: " + body);
-          if (AZME.webView != null)
-                AZME.webView.sendJavascript("alert(1)");
-        return true;
-      }
+    @Override
+    protected Boolean onDataPushStringReceived(Context context, String category, String body)
+    {
+        Log.d(AZME.LOG_TAG, "String data push message received: " + body);
+        if (AZME.webView != null)
+            AZME.webView.sendJavascript("AzureEngagement.handleDataPush('"+category+"','"+body+"')");
+        else
+            Log.e(AZME.LOG_TAG, "dataPush discarded");
 
-      @Override
-      protected Boolean onDataPushBase64Received(Context context, String category, byte[] decodedBody, String encodedBody)
-      {
-        Log.d("tmp", "Base64 data push message received: " + encodedBody);
-        // Do something useful with decodedBody like updating an image view
         return true;
-      }
+    }
+
+    @Override
+    protected Boolean onDataPushBase64Received(Context context, String category, byte[] decodedBody, String encodedBody)
+    {
+        Log.d(AZME.LOG_TAG, "String data64 push message received: " + encodedBody);
+
+        if (AZME.webView != null)
+            AZME.webView.sendJavascript("AzureEngagement.handleDataPush('"+category+"','"+encodedBody+"')");
+        else
+            Log.e(AZME.LOG_TAG, "dataPush64 discarded");
+
+        return true;
+    }
  }
