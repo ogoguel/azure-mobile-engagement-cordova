@@ -28,15 +28,16 @@ import com.microsoft.azure.engagement.EngagementAgent;
 import com.microsoft.azure.engagement.EngagementAgentUtils;
 
 public class AZME extends CordovaPlugin {
-    private CordovaInterface cordova;
+    public static CordovaInterface cordova = null;
+    public static CordovaWebView webView = null;
     private String previousActivityName = null;
     private String lastRedirect = null;
     private boolean enableLog = false;
     private static final String LOG_TAG = "cdvazme-test";
-    private final String pluginVersion = "2.0.0";
-    private final String nativeSDKVersion = "4.1.0"; // to eventually retrieve from the SDK itself
+    private static final String pluginVersion = "2.0.1";
+    private static final String nativeSDKVersion = "4.1.0"; // to eventually retrieve from the SDK itself
 
-    public void initialize(CordovaInterface _cordova, CordovaWebView webView) {
+    public void initialize(CordovaInterface _cordova, CordovaWebView _webView) {
         CordovaActivity activity =  (CordovaActivity) _cordova.getActivity();
 
      
@@ -47,8 +48,9 @@ public class AZME extends CordovaPlugin {
             if (enableLog)
                   Log.i(AZME.LOG_TAG,"Preparing Redirect to " + lastRedirect);
         }
-        super.initialize(_cordova, webView);
+        super.initialize(_cordova, _webView);
         cordova = _cordova;
+        webView  = _webView;
 
         try {
             ApplicationInfo ai = activity.getPackageManager().getApplicationInfo(activity.getPackageName(), PackageManager.GET_META_DATA);
@@ -69,9 +71,9 @@ public class AZME extends CordovaPlugin {
             EngagementAgent.getInstance(activity).sendAppInfo( b);
 
         } catch (PackageManager.NameNotFoundException e) {
-            System.err.println("Failed to load meta-data, NameNotFound: " + e.getMessage());
+            Log.e(AZME.LOG_TAG,"Failed to load meta-data, NameNotFound: " + e.getMessage());
         } catch (NullPointerException e) {
-            System.err.println("Failed to load meta-data, NullPointer: " + e.getMessage());
+            Log.e(AZME.LOG_TAG,"Failed to load meta-data, NullPointer: " + e.getMessage());
         }
     }
 

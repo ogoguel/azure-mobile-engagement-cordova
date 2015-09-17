@@ -147,11 +147,13 @@ AzureEngagement.getStatus( _statusCallback, [_failure]);
 
 History
 ----
+2.0.1
+* Added debug logs 
+
 2.0.0
-* Upgraded Native Android SDK to v4.0.0
+* Upgraded Native Android SDK to v4.1.0
 * Upgraded Native iOS SDK to v3.1.0
 * Using the ConnectionString instead of the former AppID/SDKKey/Collection
-* Added debug logs
 
 1.0.0
 * Initial Release

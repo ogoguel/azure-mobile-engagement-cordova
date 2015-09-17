@@ -6,7 +6,7 @@
 module.exports = {
 
     pluginName : 'AzureEngagement',
-    pluginVersion : '2.0.0',
+    pluginVersion : '2.0.1',
 
     onOpenURL : function (_handler) {
         var _this = this;
@@ -17,9 +17,20 @@ module.exports = {
         }, undefined, _this.pluginName, 'checkRedirect', [] );
     },
 
+    onDataPushReceived : function(_handler) {
+         var _this = this;
+        _this.dataPushHandler = _handler;
+    },
+
     handleOpenURL : function(_url) {
         if (this.openURLHandler) {
             this.openURLHandler(_url);
+        }
+    },
+    handleDataPush : function(_category,_body) {
+        console.log('handleDataPush '+_category);
+        if (this.dataPushHandler) {
+            this.dataPushHandler(_category,_body);
         }
     },
 
