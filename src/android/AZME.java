@@ -5,9 +5,14 @@
 
 package com.microsoft.azure.engagement.cordova;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 
+import android.annotation.TargetApi;
+import android.content.pm.PackageInfo;
+import android.content.pm.PermissionInfo;
+import android.os.Build;
 import android.util.Log;
 
 import org.apache.cordova.CallbackContext;
@@ -46,7 +51,7 @@ public class AZME extends CordovaPlugin {
         CordovaActivity activity =  (CordovaActivity) _cordova.getActivity();
 
         final String invokeString = activity.getIntent().getDataString();
-        if (invokeString != "" && invokeString != null) {
+        if ( invokeString != null && !invokeString.equals("") ) {
             lastRedirect = invokeString;
             if (enableLog)
                 Log.i(AZME.LOG_TAG,"Preparing Redirect to " + lastRedirect);
@@ -105,7 +110,7 @@ public class AZME extends CordovaPlugin {
 
     public void checkDataPush()
     {
-        if (readyForPush==false || isPaused==true) {
+        if (!readyForPush || isPaused) {
              return;
         }
         Map<String,String> m = com.microsoft.azure.engagement.cordova.AZMEDataPushReceiver.getPendingDataPushes(cordova.getActivity().getApplicationContext());
@@ -163,7 +168,7 @@ public class AZME extends CordovaPlugin {
                     try {
                         cb.success(new JSONObject(response));
                     } catch (JSONException e) {
-                        e.printStackTrace();
+                     //   e.printStackTrace();
                         cb.error("could not retrieve status");
                     }
                 }
@@ -257,6 +262,28 @@ public class AZME extends CordovaPlugin {
             callbackContext.success();
             return true;
         }
+        else if (action.equals("requestPermissions")) {
+            JSONObject ret = requestPermissions(args);
+            if (!ret.has("error"))
+                callbackContext.success(ret);
+            else
+            {
+                String errString = null;
+                try {
+                    errString = ret.getString("error");
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG,"missing error tag");
+                }
+                callbackContext.error(errString);
+            }
+
+            return true;
+        }
+        else if (action.equals("refreshPermissions")) {
+            refreshPermissions();
+            callbackContext.success();
+            return true;
+        }
         String str = "Unrecognized Command : "+action;
         Log.e(AZME.LOG_TAG,str);
         callbackContext.error(str);
@@ -275,4 +302,97 @@ public class AZME extends CordovaPlugin {
         checkDataPush();
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
+    private JSONObject requestPermissions(JSONArray _permissions)
+    {
+        CordovaActivity activity = (CordovaActivity)cordova.getActivity();
+
+        JSONObject ret = new JSONObject();
+        JSONObject p = new JSONObject();
+        String[] requestedPermissions = null;
+        try {
+            PackageInfo pi = activity.getPackageManager().getPackageInfo(activity.getPackageName(), PackageManager.GET_PERMISSIONS);
+            requestedPermissions = pi.requestedPermissions;
+            /*
+            for(int i=0;i<requestedPermissions.length;i++)
+                Log.d(AZME.LOG_TAG,requestedPermissions[i]);
+                */
+
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(AZME.LOG_TAG, "Failed to load permissions, NameNotFound: " + e.getMessage());
+        }
+
+        if (enableLog)
+            Log.i(AZME.LOG_TAG,"requestPermissions()");
+
+          int l = _permissions.length();
+          for(int i=0;i<l;i++)
+          {
+              try {
+                  String permission = _permissions.getString(i);
+                  String androidPermission = "android.permission."+permission;
+              //    int grant = act.checkSelfPermission(androidPermission);
+
+                  int grant = activity.checkCallingOrSelfPermission(androidPermission);
+                  try {
+                      p.put(permission,grant==PackageManager.PERMISSION_GRANTED);
+                  } catch (JSONException e) {
+                      Log.e(LOG_TAG,"invalid permissions");
+                  }
+                  if (grant != PackageManager.PERMISSION_GRANTED) {
+
+
+                      if (!Arrays.asList(requestedPermissions).contains(androidPermission))
+                      {
+                          String errString = "requested permission "+androidPermission+" not set in Manifest";
+                          Log.e(LOG_TAG,errString);
+                          try {
+                              ret.put("error", errString);
+                          } catch (JSONException e) {
+                              Log.e(LOG_TAG,"invalid permissions");
+                          }
+                      }
+                      else
+                      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                          // Trying to request the permission if running on AndroidM
+                          Log.i(AZME.LOG_TAG, "requesting runtime permission " + androidPermission);
+                          activity.requestPermissions(new String[]{androidPermission}, 0);
+                      }
+
+                  }
+                  else
+                      Log.i(AZME.LOG_TAG,permission+" OK");
+              }catch (JSONException e) {
+                  Log.e(LOG_TAG,"invalid permission");
+              }
+
+          }
+
+          try {
+              ret.put("permissions", p);
+          } catch (JSONException e) {
+              Log.e(LOG_TAG,"invalid permissions");
+          }
+
+
+        return ret;
+    }
+
+    private void refreshPermissions()
+    {
+         if (enableLog)
+            Log.i(AZME.LOG_TAG,"refreshPermissions()");
+
+        EngagementAgent.getInstance(cordova.getActivity()).refreshPermissions();
+    }
+/*
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults)
+    {
+      // Only a positive location permission update requires engagement agent refresh, hence the request code matching from above function
+
+      if (requestCode == 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        refreshPermissions();
+    }
+*/
 }

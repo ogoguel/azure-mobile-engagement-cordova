@@ -344,21 +344,53 @@ static bool enableLog = false;
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
-// CheckRedirect does nothing on iOS
+
 - (void)checkRedirect:(CDVInvokedUrlCommand*)command
 {
     NSString *type = [command.arguments objectAtIndex:0];
-    
+    CDVPluginResult* pluginResult ;
+
     if (enableLog)
         NSLog(CDVAZME_TAG @"checkRedirect:%@",type);
-    
+
+    if ([type compare:@"url"]==NSOrderedSame)
+    {
+        // url does nothing on ios
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:nil ];
+    }
+    else
     if ([type compare:@"data"]==NSOrderedSame)
     {
         readyForPush = true;
         [self processDataPush];
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:nil ];
     }
+    else
+    {
+        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR  messageAsString:@"unsupported type" ];
+    }
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)requestPermissions:(CDVInvokedUrlCommand*)command
+{
+   
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:nil ];
+    
+    if (enableLog)
+        NSLog(CDVAZME_TAG @"requestPermissions does nothing on ios");
+    
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+- (void)refreshPermissions:(CDVInvokedUrlCommand*)command
+{
     
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK  messageAsString:nil ];
+    
+    if (enableLog)
+        NSLog(CDVAZME_TAG @"requestPermissions does nothing on ios");
+    
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 

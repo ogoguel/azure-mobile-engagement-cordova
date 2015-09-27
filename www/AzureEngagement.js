@@ -72,6 +72,14 @@ module.exports = {
         cordova.exec(_success,_failure, this.pluginName, 'registerForPushNotification', [] );
     },
 
+    requestPermissions: function (_permissions,_success,_failure) {
+        cordova.exec(_success,_failure, this.pluginName, 'requestPermissions', _permissions );
+    },
+
+    refreshPermissions: function (_success,_failure) {
+        cordova.exec(_success,_failure, this.pluginName, 'refreshPermissions', [] );
+    },
+
 };
 
 
