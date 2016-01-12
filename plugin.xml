@@ -5,7 +5,7 @@
  * Licensed under the MIT license. See License.txt in the project root for license information.
  */
  -->
-<plugin id="cordova-plugin-ms-azure-mobile-engagement" version="2.2.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+<plugin id="cordova-plugin-ms-azure-mobile-engagement" version="2.3.0" xmlns="http://apache.org/cordova/ns/plugins/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
     <name>Azure Mobile Engagement</name>
     <description>Azure Mobile Engagement</description>
     <keywords>cordova,azme</keywords>
@@ -15,6 +15,10 @@
     <engines>
         <!-- required for CB-9171 & CB-9162 -->
         <engine name="cordova-plugman" version=">=5.2.0" />
+        <!-- required for Android M Compatibility -->
+        <engine name="cordova-android" version=">=5.0.0" />
+        <!-- required for XCode7 Compatibility -->
+        <engine name="cordova-android" version=">=3.9.2" />
     </engines>
 
     <js-module name="AzureEngagement" src="www/AzureEngagement.js">
@@ -103,7 +107,7 @@
                     <category android:name="$PACKAGE_NAME"/>
                 </intent-filter>
             </receiver>
-            <receiver android:name="com.microsoft.azure.engagement.cordova.AZMEDataPushReceiver"
+            <receiver android:name="com.microsoft.azure.engagement.shared.EngagementDataPushReceiver"
           android:exported="false">
           <intent-filter>
             <action android:name="com.microsoft.azure.engagement.reach.intent.action.DATA_PUSH" />
@@ -130,8 +134,10 @@
             <uses-permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE"/>
             <permission android:name="$PACKAGE_NAME.permission.C2D_MESSAGE" android:protectionLevel="signature"/>
         </config-file>
-        <source-file src="src/android/AZME.java" target-dir="src/com/microsoft/azure/engagement/cordova"/>
-        <source-file src="src/android/AZMEDataPushReceiver.java" target-dir="src/com/microsoft/azure/engagement/cordova"/>
+        <source-file src="src/android/cordova/AZME.java" target-dir="src/com/microsoft/azure/engagement/cordova"/>
+        <source-file src="src/android/shared/EngagementDataPushReceiver.java" target-dir="src/com/microsoft/azure/engagement/shared"/>
+        <source-file src="src/android/shared/EngagementShared.java" target-dir="src/com/microsoft/azure/engagement/shared"/>
+        <source-file src="src/android/shared/EngagementDelegate.java" target-dir="src/com/microsoft/azure/engagement/shared"/>
         <source-file src="src/android/EngagementSDK/mobile-engagement-4.1.0.jar" target-dir="libs"/>
         <framework src="com.android.support:support-v4:+" />
         <source-file src="src/android/EngagementSDK/res/drawable/engagement_close.png" target-dir="res/drawable"/>
@@ -187,8 +193,10 @@
                 <key>remote-notification</key>
             </array>
         </config-file>
-        <header-file src="src/ios/AZME.h"/>
-        <source-file src="src/ios/AZME.m"/>
+        <header-file src="src/ios/AZMECordova.h"/>
+        <source-file src="src/ios/AZMECordova.m"/>
+        <header-file src="src/ios/EngagementShared.h"/>
+        <source-file src="src/ios/EngagementShared.m"/>
         <header-file src="src/ios/EngagementSDK/Classes/AEIdfaProvider.h"/>
         <source-file src="src/ios/EngagementSDK/Classes/AEIdfaProvider.m"/>
         <header-file src="src/ios/EngagementSDK/Headers/AEModule.h"/>
@@ -230,11 +238,5 @@
         <framework src="CoreLocation.framework"/>
         <framework src="AdSupport.framework"/>
         <framework src="libxml2.tbd"/>
-        <info>
-            *** If using XCode7 ***
-                Set Enable Bitcode to No in build settings
-                Enable "Push Notification" in target capabilities
-            ***
-        </info>
     </platform>
 </plugin>

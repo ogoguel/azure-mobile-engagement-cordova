@@ -52,11 +52,8 @@ cordova plugin rm cordova-plugin-ms-azure-mobile-engagement
 ```
 Push Notification Support
 --
-To enable push notification on iOS, you  need to create a provision profile with push notifications support.
-
-If you are using Xcode 7 and iOS 9, you have to perform the following additional steps:
-* Set Enable Bitcode to No under Targets > Build Settings > set Enable Bitcode to Yes or No. (Make sure to select ALL from the top bar.)
-* Enable Push Notifications in Targets > Your Target Name > Capabilities.
+To enable push notification on iOS, you  need create a provision profile with push notifications support.
+and to enable Push Notifications in Targets > Your Target Name > Capabilities.
 
 Location Reporting
 --
@@ -77,6 +74,7 @@ cordova plugin add cordova-plugin-ms-azure-mobile-engagement --variable enableLo
   * `cordova-plugin-ms-azure-mobile-engagement-fineruntime-location`
   * `cordova-plugin-ms-azure-mobile-engagement-foreground-reporting`
   * `cordova-plugin-ms-azure-mobile-engagement-background-reporting`
+* If you are targetting AndroidM, your application needs to call  `AzureEngagement.requestPermissions`at some point (cf. below)
 
 Public Interface
 --
@@ -92,6 +90,12 @@ Once the `deviceready` event has been triggered by the Cordova framework, a `Azu
 * AzureEngagement.onDataPushReceived
 * AzureEngagement.registerForPushNotification
 * AzureEngagement.getStatus
+* AzureEngagement.requestPermissions
+* AzureEngagement.sendSessionEvent
+* AzureEngagement.sendSessionError
+* AzureEngagement.sendError
+* AzureEngagement.sendJobEvent
+* AzureEngagement.sendJobError
 
 ### AzureEngagement.startActivity
 
@@ -133,6 +137,35 @@ AzureEngagement.endJob(_jobName,[ _success], [_failure]);
 ```
 ##### Params
 * `_jobName`: the name of the job
+
+### AzureEngagement.sendSessionEvent
+Send a session event
+```javascript
+AzureEngagement.sendSessionEvent(_eventName, _extraInfos ,[ _success], [_failure]);
+```
+### AzureEngagement.sendSessionError
+Send a session error
+```javascript
+AzureEngagement.sendSessionError(_error, _extraInfos ,[ _success], [_failure]);
+```
+
+### AzureEngagement.sendError
+Send an error
+```javascript
+AzureEngagement.sendError(_error, _extraInfos ,[ _success], [_failure]);
+```
+
+### AzureEngagement.sendJobEvent
+Send a job event
+```javascript
+AzureEngagement.sendError(_eventName, _jobName, _extraInfos ,[ _success], [_failure]);
+```
+
+### AzureEngagement.sendJobError
+Send a job error
+```javascript
+AzureEngagement.sendError(_error, _jobName, _extraInfos ,[ _success], [_failure]);
+```
 
 ### AzureEngagement.sendAppInfo
 Send App Infos atttached to the currente device.
@@ -190,6 +223,27 @@ Register the application to receive push notifications on iOS : this call will a
 AzureEngagement.registerForPushNotification( [_success], [_failure]);
 ```
 This function does nothing on platforms other than iOS. 
+
+### AzureEngagement.requestPermissions
+
+Allow the user to autorize the permissions needed for the proper execution of the AZME plugin. 
+By default, there's no need for a additional permissions, but if you've enabled the location reporting, this function must be called  to let the user allow the location based permissions (`ACCESS_FINE_LOCATION` and/or `ACCESS_COARSE_LOCATION`)
+
+```javascript
+AzureEngagement.requestPermissions([_success], [_failure]);
+```
+
+##### Notes
+* Returns the list of permissions that have been asked, ans whether the user has allowed them or not
+* This function does nothing on platforms other than Android M. 
+
+##### Example
+```javascript
+AzureEngagement.requestPermissions(function(_ret) {
+                console.log("permissions = "+JSON.stringify(_ret));
+    });
+```
+
 ### AzureEngagement.getStatus
 Returns information about the AZME plugin.
 ```javascript
@@ -201,7 +255,7 @@ AzureEngagement.getStatus( _statusCallback, [_failure]);
 ##### Example
 ```javascript
     AzureEngagement.getStatus(function(_info) {
-            console.log("AZME SDK Version : "+_info.AZMEVersion);
+            console.log("AZME native Version : "+_info.nativeVersion);
             console.log("AZME plugin Version : "+_info.pluginVersion);
             console.log("Device ID : "+_info.deviceId);
         });
@@ -210,6 +264,12 @@ AzureEngagement.getStatus( _statusCallback, [_failure]);
 
 History
 ----
+2.3.0
+* Added Android M Support
+* Added reporting functions
+* Refactor underlying code to share the same base code with the AZME Unity SDK
+
+
 2.2.0
 * Added location reporting
 

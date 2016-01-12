@@ -4,13 +4,13 @@
  * Licensed under the MIT license. See License.txt in the project root for license information.
  */
 
-package com.microsoft.azure.engagement.cordova;
+package com.microsoft.azure.engagement.shared;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Map;
 import java.util.TreeMap;
-
+import android.annotation.TargetApi;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -18,9 +18,9 @@ import android.util.Log;
 
 import com.microsoft.azure.engagement.reach.EngagementReachDataPushReceiver;
 
-public class AZMEDataPushReceiver extends EngagementReachDataPushReceiver
+public class EngagementDataPushReceiver extends EngagementReachDataPushReceiver
 {
-    public static final String AZME_PREFERENCES = "AZMEDataPush";
+    public static final String ENGAGEMENT_PREFERENCES = "EngagementDataPush";
 
     //  http://stackoverflow.com/questions/607176/java-equivalent-to-javascripts-encodeuricomponent-that-produces-identical-outpu
     public static String encodeURIComponent(String s) {
@@ -36,16 +36,17 @@ public class AZMEDataPushReceiver extends EngagementReachDataPushReceiver
                         .replaceAll("\\%7E", "~");
         }
         catch (UnsupportedEncodingException e) {
-            Log.e(AZME.LOG_TAG,"Unsupported Encoding");
+            Log.e(EngagementShared.LOG_TAG,"Unsupported Encoding");
         }
         return result;
     }
 
+    @TargetApi(9)
     public static Map<String,String> getPendingDataPushes(Context context) {
 
         Map<String, String> smap = new TreeMap<String, String>();
 
-        SharedPreferences settings = context.getSharedPreferences(AZME_PREFERENCES, 0/*MODE_PRIVATE*/);
+        SharedPreferences settings = context.getSharedPreferences(ENGAGEMENT_PREFERENCES, 0/*MODE_PRIVATE*/);
         Map<String,?> m = settings.getAll();
 
         // convert to treemap to keep the order by timestamp
@@ -54,24 +55,25 @@ public class AZMEDataPushReceiver extends EngagementReachDataPushReceiver
 
         }
         // remove all
-        settings.edit().clear().commit();
+        settings.edit().clear().apply();
 
         return smap;
     }
 
+    @TargetApi(9)
     public static void addDataPush(Context context,String category, String body) {
-        SharedPreferences settings = context.getSharedPreferences(AZME_PREFERENCES, 0/*MODE_PRIVATE*/);
+        SharedPreferences settings = context.getSharedPreferences(ENGAGEMENT_PREFERENCES, 0/*MODE_PRIVATE*/);
         SharedPreferences.Editor prefEditor = settings.edit();
 
         Long tsLong = System.currentTimeMillis()/1000;
         String ts = tsLong.toString();
         String value=  category+" "+body;
         prefEditor.putString(ts, value);
-        prefEditor.commit();
+        prefEditor.apply();
 
         final int MAX_CHAR = 128;
         int maxLength = (value.length() < MAX_CHAR)?value.length():MAX_CHAR;
-        Log.i(AZME.LOG_TAG, "received data push (" + ts + ") : " + value.substring(0,maxLength));
+        Log.i(EngagementShared.LOG_TAG, "received data push (" + ts + ") : " + value.substring(0,maxLength));
     }
 
     @Override
@@ -84,8 +86,8 @@ public class AZMEDataPushReceiver extends EngagementReachDataPushReceiver
         String encodedBody = encodeURIComponent(body);
        
         addDataPush(context.getApplicationContext(), encodedCategory, encodedBody);
-        if (AZME.singleton != null)
-            AZME.singleton.checkDataPush();
+        if (EngagementShared.engagementSharedSingleton != null  )
+            EngagementShared.engagementSharedSingleton.checkDataPush();
 
         return true;
     }
@@ -98,8 +100,8 @@ public class AZMEDataPushReceiver extends EngagementReachDataPushReceiver
         
         String encodedCategory = encodeURIComponent(category);
         addDataPush(context.getApplicationContext(),encodedCategory,encodedBody);
-        if (AZME.singleton != null)
-            AZME.singleton.checkDataPush();
+        if (EngagementShared.engagementSharedSingleton  != null  )
+            EngagementShared.engagementSharedSingleton.checkDataPush();
 
         return true;
     }
