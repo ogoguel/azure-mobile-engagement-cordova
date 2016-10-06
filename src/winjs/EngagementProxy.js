@@ -5,7 +5,7 @@
 
 
 window.azureEngagement = {
-    pluginVersion : "3.1.0",    
+    pluginVersion : "3.2.1",    
     AZME_ENABLE_PLUGIN_LOG: ${AZME_ENABLE_PLUGIN_LOG}, // set by the after_prepare.js hook
     AZME_ENABLE_NATIVE_LOG: ${AZME_ENABLE_NATIVE_LOG},
     connectionString: "${AZME_WINDOWS_CONNECTION_STRING}",
@@ -31,6 +31,8 @@ document.getElementsByTagName('head')[0].appendChild(se);
 engagementLogger("JS SDK loaded");
 
 cordova.commandProxy.add("Engagement",{ 
+
+    pluginVersion : window.azureEngagement.pluginVersion,
 
     startActivity: function (successCallback, errorCallback, _params) {
         var activityName = _params[0];
